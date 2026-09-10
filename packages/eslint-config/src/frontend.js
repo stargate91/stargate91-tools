@@ -148,10 +148,14 @@ export function createFrontendConfig(options = {}) {
         // ─── REACT HOOKS & REACT COMPILER (SWAYA-MAIN) ───
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn",
-        "react-hooks/immutability": "warn",
-        "react-hooks/set-state-in-effect": "warn",
-        "react-hooks/preserve-manual-memoization": "warn",
-        "react-hooks/refs": "warn",
+        ...(reactHooks.rules && reactHooks.rules["immutability"]
+          ? {
+              "react-hooks/immutability": "warn",
+              "react-hooks/set-state-in-effect": "warn",
+              "react-hooks/preserve-manual-memoization": "warn",
+              "react-hooks/refs": "warn",
+            }
+          : {}),
 
         // ─── ACCESSIBILITY / WCAG 2.1 (NOVA + MY-WEBSITE) ───
         "jsx-a11y/alt-text": "error",
