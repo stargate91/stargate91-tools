@@ -4,17 +4,20 @@ Enterprise-grade shared ESLint 9+ Flat Configurations for Stargate91 projects.
 
 ## Quick Start (CLI Installer)
 
-Run the automated installer in any project:
-
+### Backend Project:
 ```bash
-npx @stargate91/eslint-config
+npx @stargate91/eslint-config --type backend
 ```
 
-The installer automatically:
-1. Detects your package manager (`npm`, `pnpm`, `yarn`, `bun`).
-2. Installs `@stargate91/eslint-config`, `eslint`, and `typescript`.
-3. Creates `eslint.config.mjs` with type-aware backend settings.
-4. Adds `lint` and `lint:fix` scripts to `package.json`.
+### Frontend Project (React / Next.js / Vite):
+```bash
+npx @stargate91/eslint-config --type frontend
+```
+
+### Fullstack Monorepo:
+```bash
+npx @stargate91/eslint-config --type fullstack
+```
 
 ### CLI Options
 
@@ -22,38 +25,40 @@ The installer automatically:
 npx @stargate91/eslint-config --help
 
 Options:
-  -t, --type <type>        Configuration type: backend (default: backend)
+  -t, --type <type>        Configuration type: backend, frontend, fullstack (default: backend)
   --pm <manager>           Package manager: npm, pnpm, yarn, bun (default: auto-detect)
   --skip-install           Generate config and scripts without running package install
   -y, --yes                Accept defaults non-interactively
   -h, --help               Show help message
 ```
 
-## Manual Setup
+## Configurations
 
-Install dependencies:
-
-```bash
-npm install -D @stargate91/eslint-config eslint typescript
-```
-
-Add `eslint.config.mjs` to your project root:
+### 1. Frontend Configuration (`@stargate91/eslint-config/frontend`)
+Combines the best practices from Nova, My-Website, and Swaya-Main:
+- **Strict React & JSX Ergonomics (Nova):** Forbids inline `style` props, enforces `self-closing-comp`, `hook-use-state`, clean boolean values, and fragments.
+- **React Compiler & Hooks (Swaya-Main):** React 19 rules (`react-hooks/immutability`, `set-state-in-effect`, `preserve-manual-memoization`, `refs`).
+- **Accessibility / WCAG 2.1 (Nova & My-Website):** 11 mandatory `jsx-a11y` error checks.
+- **Security Auditing (My-Website):** `eslint-plugin-security` ReDoS, eval, and timing attack checks.
+- **Deterministic Import Architecture (My-Website):** `import-x/order` grouping and cycle detection.
+- **Granular i18n Hygiene (Nova):** Comprehensive exclusion of layout props, icons, and styling utilities.
 
 ```javascript
 import tseslint from "typescript-eslint";
-import { createBackendConfig } from "@stargate91/eslint-config/backend";
+import { createFrontendConfig } from "@stargate91/eslint-config/frontend";
 
 export default tseslint.config(
-  {
-    ignores: [
-      "**/dist/**",
-      "**/node_modules/**",
-      "**/*.d.ts",
-    ],
-  },
-  ...createBackendConfig({
+  { ignores: ["**/dist/**", "**/node_modules/**", "**/*.d.ts"] },
+  ...createFrontendConfig({
     tsconfigRootDir: import.meta.dirname,
     project: ["./tsconfig.json"],
   })
 );
 ```
+
+### 2. Backend Configuration (`@stargate91/eslint-config/backend`)
+- **Type-Aware TypeScript:** `strictTypeChecked` + `stylisticTypeChecked`.
+- **Async & Promise Safety:** `return-await: in-try-catch`, `no-floating-promises`, `no-misused-promises`, `use-unknown-in-catch-callback-variable`.
+- **Node.js Process & Event-Loop Protection:** `n/no-process-exit`, `n/no-path-concat`, `n/no-sync`.
+- **Drizzle ORM Safety:** `drizzle/enforce-delete-with-where`, `drizzle/enforce-update-with-where`.
+- **Import Architecture:** `import-x/no-cycle`, `import-x/no-self-import`.

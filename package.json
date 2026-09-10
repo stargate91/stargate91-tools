@@ -16,5 +16,9 @@
     "monorepo"
   ],
   "author": "stargate91",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "9.20.0",
+    "typescript": "5.7.3"
+  }
 }

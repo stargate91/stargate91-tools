@@ -35,7 +35,7 @@ function printHelp() {
 Usage: npx @stargate91/eslint-config [options]
 
 Options:
-  -t, --type <type>        Configuration type: backend (default: backend)
+  -t, --type <type>        Configuration type: backend, frontend, fullstack (default: backend)
   --pm <manager>           Package manager: npm, pnpm, yarn, bun (default: auto-detect)
   --skip-install           Generate config and scripts without installing packages
   -y, --yes                Skip interactive confirmations
@@ -64,7 +64,7 @@ function getInstallCommand(pm) {
   }
 }
 
-function generateBackendConfigFile(cwd) {
+function generateConfigFile(cwd, type) {
   const targetPath = path.join(cwd, "eslint.config.mjs");
   if (fs.existsSync(targetPath)) {
     const backupPath = path.join(cwd, "eslint.config.mjs.bak");
@@ -72,17 +72,74 @@ function generateBackendConfigFile(cwd) {
     console.log(`[stargate-eslint] Existing eslint.config.mjs backed up to eslint.config.mjs.bak`);
   }
 
-  // Check if project has monorepo tsconfigs or single root tsconfig
   const hasMonorepo = fs.existsSync(path.join(cwd, "packages")) || fs.existsSync(path.join(cwd, "apps"));
   const projectGlob = hasMonorepo
     ? '["./packages/*/tsconfig.json", "./apps/*/tsconfig.json"]'
     : '["./tsconfig.json"]';
 
-  const content = `import tseslint from "typescript-eslint";
-import { createBackendConfig } from "@stargate91/eslint-config/backend";
+  let content = "";
+
+  if (type === "frontend") {
+    content = `import tseslint from "typescript-eslint";
+import { createFrontendConfig } from "@stargate91/eslint-config/frontend";
 
 export default tseslint.config(
   // Global ignore patterns
+  {
+    ignores: [
+      "**/dist/**",
+      "**/build/**",
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/*.d.ts",
+    ],
+  },
+
+  // Shared Stargate91 frontend rules (React, Hooks, A11y, Security, Import-X)
+  ...createFrontendConfig({
+    tsconfigRootDir: import.meta.dirname,
+    project: ${projectGlob},
+  })
+);
+`;
+  } else if (type === "fullstack") {
+    content = `import tseslint from "typescript-eslint";
+import { createBackendConfig } from "@stargate91/eslint-config/backend";
+import { createFrontendConfig } from "@stargate91/eslint-config/frontend";
+
+export default tseslint.config(
+  {
+    ignores: [
+      "**/dist/**",
+      "**/build/**",
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/drizzle/**",
+      "**/*.d.ts",
+    ],
+  },
+
+  // Backend rules
+  ...createBackendConfig({
+    tsconfigRootDir: import.meta.dirname,
+    project: ${projectGlob},
+    files: ["apps/api/**/*.ts", "apps/bot/**/*.ts", "packages/**/*.ts"],
+  }),
+
+  // Frontend rules
+  ...createFrontendConfig({
+    tsconfigRootDir: import.meta.dirname,
+    project: ${projectGlob},
+    files: ["apps/web/**/*.{ts,tsx}", "apps/desktop/src/renderer/**/*.{ts,tsx}"],
+  })
+);
+`;
+  } else {
+    // Default backend
+    content = `import tseslint from "typescript-eslint";
+import { createBackendConfig } from "@stargate91/eslint-config/backend";
+
+export default tseslint.config(
   {
     ignores: [
       "**/dist/**",
@@ -101,9 +158,10 @@ export default tseslint.config(
   })
 );
 `;
+  }
 
   fs.writeFileSync(targetPath, content, "utf8");
-  console.log(`[stargate-eslint] Created eslint.config.mjs`);
+  console.log(`[stargate-eslint] Created eslint.config.mjs (${type} configuration)`);
 }
 
 function updatePackageJson(cwd) {
@@ -155,12 +213,14 @@ async function run() {
   }
 
   const cwd = process.cwd();
-  console.log("[stargate-eslint] Initializing ESLint configuration...");
+  const configType = values.type || "backend";
+
+  console.log(`[stargate-eslint] Initializing ${configType} ESLint configuration...`);
 
   const pm = values.pm || detectPackageManager(cwd);
   console.log(`[stargate-eslint] Detected package manager: ${pm}`);
 
-  generateBackendConfigFile(cwd);
+  generateConfigFile(cwd, configType);
   updatePackageJson(cwd);
 
   if (!values["skip-install"]) {
