@@ -9,7 +9,8 @@
     "./backend": "./src/backend.js"
   },
   "files": [
-    "src"
+    "src",
+    "bin"
   ],
   "keywords": [
     "eslint",
@@ -35,5 +36,10 @@
   "bin": {
     "stargate-lint": "./bin/cli.js",
     "stargate-eslint": "./bin/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stargate91/stargate91-tools.git",
+    "directory": "packages/eslint-config"
   }
 }
