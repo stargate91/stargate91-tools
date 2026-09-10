@@ -1,0 +1,39 @@
+{
+  "name": "@stargate91/stylelint-config",
+  "version": "0.1.0",
+  "description": "Enterprise-grade shareable Stylelint configuration with strict Design Tokens, Recess Order, and Specificity hygiene",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "bin"
+  ],
+  "keywords": [
+    "stylelint",
+    "stylelint-config",
+    "design-tokens",
+    "recess-order",
+    "css"
+  ],
+  "author": "stargate91",
+  "license": "MIT",
+  "peerDependencies": {
+    "stylelint": "^16.0.0 || ^17.0.0"
+  },
+  "dependencies": {
+    "stylelint-config-recess-order": "^7.8.0",
+    "stylelint-config-standard": "^40.0.0",
+    "stylelint-order": "^8.1.1"
+  },
+  "bin": {
+    "stargate-stylelint": "./bin/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stargate91/stargate91-tools.git",
+    "directory": "packages/stylelint-config"
+  }
+}
