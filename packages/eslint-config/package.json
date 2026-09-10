@@ -1,11 +1,12 @@
 {
   "name": "@stargate91/eslint-config",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Enterprise-grade shared ESLint 9+ Flat Configurations for backend and frontend projects",
   "type": "module",
   "main": "./src/index.js",
   "exports": {
     ".": "./src/index.js",
+    "./base": "./src/base.js",
     "./backend": "./src/backend.js",
     "./frontend": "./src/frontend.js"
   },

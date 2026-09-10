@@ -35,7 +35,7 @@ function printHelp() {
 Usage: npx @stargate91/eslint-config [options]
 
 Options:
-  -t, --type <type>        Configuration type: backend, frontend, fullstack (default: backend)
+  -t, --type <type>        Configuration type: base, backend, frontend, fullstack (default: backend)
   --pm <manager>           Package manager: npm, pnpm, yarn, bun (default: auto-detect)
   --skip-install           Generate config and scripts without installing packages
   -y, --yes                Skip interactive confirmations
@@ -79,7 +79,29 @@ function generateConfigFile(cwd, type) {
 
   let content = "";
 
-  if (type === "frontend") {
+  if (type === "base") {
+    content = `import tseslint from "typescript-eslint";
+import { createBaseConfig } from "@stargate91/eslint-config/base";
+
+export default tseslint.config(
+  // Global ignore patterns
+  {
+    ignores: [
+      "**/dist/**",
+      "**/build/**",
+      "**/node_modules/**",
+      "**/*.d.ts",
+    ],
+  },
+
+  // Shared Stargate91 base TypeScript rules (Strict TS, Security, Import-X)
+  ...createBaseConfig({
+    tsconfigRootDir: import.meta.dirname,
+    project: ${projectGlob},
+  })
+);
+`;
+  } else if (type === "frontend") {
     content = `import tseslint from "typescript-eslint";
 import { createFrontendConfig } from "@stargate91/eslint-config/frontend";
 

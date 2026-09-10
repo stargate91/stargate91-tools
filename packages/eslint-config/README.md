@@ -4,6 +4,11 @@ Enterprise-grade shared ESLint 9+ Flat Configurations for Stargate91 projects.
 
 ## Quick Start (CLI Installer)
 
+### Base TypeScript Library / Shared Package:
+```bash
+npx @stargate91/eslint-config --type base
+```
+
 ### Backend Project:
 ```bash
 npx @stargate91/eslint-config --type backend
@@ -25,7 +30,7 @@ npx @stargate91/eslint-config --type fullstack
 npx @stargate91/eslint-config --help
 
 Options:
-  -t, --type <type>        Configuration type: backend, frontend, fullstack (default: backend)
+  -t, --type <type>        Configuration type: base, backend, frontend, fullstack (default: backend)
   --pm <manager>           Package manager: npm, pnpm, yarn, bun (default: auto-detect)
   --skip-install           Generate config and scripts without running package install
   -y, --yes                Accept defaults non-interactively
@@ -34,7 +39,27 @@ Options:
 
 ## Configurations
 
-### 1. Frontend Configuration (`@stargate91/eslint-config/frontend`)
+### 1. Base Configuration (`@stargate91/eslint-config/base`)
+Designed for pure TypeScript libraries, shared models, utility libraries, and packages without React or Node runtime dependencies:
+- **Type-Aware TypeScript:** `strictTypeChecked` + `stylisticTypeChecked`.
+- **Core Hygiene:** `consistent-type-imports`, `no-explicit-any`, `curly`, `eqeqeq`, `no-floating-promises`, `return-await: in-try-catch`.
+- **Security Auditing:** `eslint-plugin-security` ReDoS, eval, timing attack checks.
+- **Import Architecture:** `import-x/order`, `no-cycle`, `no-duplicates`, `no-self-import`.
+
+```javascript
+import tseslint from "typescript-eslint";
+import { createBaseConfig } from "@stargate91/eslint-config/base";
+
+export default tseslint.config(
+  { ignores: ["**/dist/**", "**/node_modules/**", "**/*.d.ts"] },
+  ...createBaseConfig({
+    tsconfigRootDir: import.meta.dirname,
+    project: true,
+  })
+);
+```
+
+### 2. Frontend Configuration (`@stargate91/eslint-config/frontend`)
 Combines the best practices from Nova, My-Website, and Swaya-Main:
 - **Strict React & JSX Ergonomics (Nova):** Forbids inline `style` props, enforces `self-closing-comp`, `hook-use-state`, clean boolean values, and fragments.
 - **React Compiler & Hooks (Swaya-Main):** React 19 rules (`react-hooks/immutability`, `set-state-in-effect`, `preserve-manual-memoization`, `refs`).
@@ -56,7 +81,7 @@ export default tseslint.config(
 );
 ```
 
-### 2. Backend Configuration (`@stargate91/eslint-config/backend`)
+### 3. Backend Configuration (`@stargate91/eslint-config/backend`)
 - **Type-Aware TypeScript:** `strictTypeChecked` + `stylisticTypeChecked`.
 - **Async & Promise Safety:** `return-await: in-try-catch`, `no-floating-promises`, `no-misused-promises`, `use-unknown-in-catch-callback-variable`.
 - **Node.js Process & Event-Loop Protection:** `n/no-process-exit`, `n/no-path-concat`, `n/no-sync`.
