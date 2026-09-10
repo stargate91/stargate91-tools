@@ -13,6 +13,7 @@ Enterprise-grade shared ESLint 9+ Flat Configurations for Stargate91 projects. F
 
 - **ESLint 9 Flat Config Native**: Modern `eslint.config.mjs` without legacy `.eslintrc` debt.
 - **Automated CLI Installer**: Run a single `npx` command to initialize configs, scripts, and dependencies.
+- **Stylelint Integration**: Add `--stylelint` to automatically install and configure `@stargate91/stylelint-config` simultaneously.
 - **3 Specialized Profiles**:
   - `/base`: Pure TypeScript libraries, utilities, models, and shared packages.
   - `/backend`: Node.js process protection, Drizzle ORM query guards, strict async/promise safety.
@@ -24,26 +25,31 @@ Enterprise-grade shared ESLint 9+ Flat Configurations for Stargate91 projects. F
 
 ## Quick Start (CLI Installer)
 
-Initialize your ESLint configuration in one non-interactive command:
+Initialize your configuration in one non-interactive command:
 
-### 1. Pure TypeScript Library / Shared Package:
+### 1. Frontend Application (with Stylelint integration):
 ```bash
-npx @stargate91/eslint-config@latest --type base
+npx @stargate91/eslint-config --type frontend --stylelint
 ```
 
-### 2. Frontend Application (React, Next.js, Vite):
+### 2. Frontend Application (ESLint only):
 ```bash
-npx @stargate91/eslint-config@latest --type frontend
+npx @stargate91/eslint-config --type frontend
 ```
 
-### 3. Backend Service (Node.js, Drizzle ORM, APIs, Bots):
+### 3. Pure TypeScript Library / Shared Package:
 ```bash
-npx @stargate91/eslint-config@latest --type backend
+npx @stargate91/eslint-config --type base
 ```
 
-### 4. Fullstack Monorepo Root:
+### 4. Backend Service (Node.js, Drizzle ORM, APIs, Bots):
 ```bash
-npx @stargate91/eslint-config@latest --type fullstack
+npx @stargate91/eslint-config --type backend
+```
+
+### 5. Fullstack Monorepo Root:
+```bash
+npx @stargate91/eslint-config --type fullstack --stylelint
 ```
 
 ### CLI Flags
@@ -53,6 +59,7 @@ Usage: stargate-eslint [options]
 
 Options:
   -t, --type <type>        Configuration type: base, backend, frontend, fullstack (default: backend)
+  --stylelint              Also configure Stylelint with @stargate91/stylelint-config
   --pm <manager>           Package manager: npm, pnpm, yarn, bun (default: auto-detect)
   --skip-install           Generate config and scripts without running package install
   -y, --yes                Accept defaults non-interactively
@@ -97,12 +104,6 @@ export default tseslint.config(
   })
 );
 ```
-
-**Key Rules:**
-- **Strict TypeScript**: `consistent-type-imports`, `no-explicit-any`, `no-non-null-assertion`, `use-unknown-in-catch-callback-variable`.
-- **Async Safety**: `no-floating-promises`, `no-misused-promises`, `await-thenable`, `return-await: in-try-catch`.
-- **Security Auditing**: `detect-unsafe-regex`, `detect-eval-with-expression`, buffer and timing attack detection.
-- **Import Hygiene**: `import-x/order`, `no-cycle`, `no-self-import`, `no-duplicates`.
 
 ---
 
@@ -168,11 +169,6 @@ export default tseslint.config(
 );
 ```
 
-**Key Rules:**
-- **Node.js Process & Event Loop Safety**: `n/no-process-exit`, `n/no-sync`, `n/no-path-concat`.
-- **Drizzle ORM Query Protection**: `drizzle/enforce-delete-with-where`, `drizzle/enforce-update-with-where`.
-- **Strict Async Safety**: `return-await: in-try-catch`, `no-floating-promises`, `no-misused-promises`.
-
 ---
 
 ### 4. Fullstack Monorepo Configuration
@@ -236,13 +232,13 @@ All config factory functions accept an options object:
 
 ## Package.json Scripts
 
-Add the following to your `package.json`:
-
 ```json
 {
   "scripts": {
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "lint:css": "stylelint \"src/**/*.css\"",
+    "lint:css:fix": "stylelint \"src/**/*.css\" --fix"
   }
 }
 ```

@@ -14,6 +14,10 @@ const optionsConfig = {
   pm: {
     type: "string",
   },
+  stylelint: {
+    type: "boolean",
+    default: false,
+  },
   "skip-install": {
     type: "boolean",
     default: false,
@@ -30,16 +34,25 @@ const optionsConfig = {
   },
 };
 
+const VALID_TYPES = ["base", "backend", "frontend", "fullstack"];
+
 function printHelp() {
   console.log(`
 Usage: npx @stargate91/eslint-config [options]
 
 Options:
   -t, --type <type>        Configuration type: base, backend, frontend, fullstack (default: backend)
+  --stylelint              Also configure Stylelint with @stargate91/stylelint-config
   --pm <manager>           Package manager: npm, pnpm, yarn, bun (default: auto-detect)
   --skip-install           Generate config and scripts without installing packages
   -y, --yes                Skip interactive confirmations
   -h, --help               Show this help message
+
+Examples:
+  npx @stargate91/eslint-config --type frontend
+  npx @stargate91/eslint-config --type frontend --stylelint
+  npx @stargate91/eslint-config --type backend
+  npx @stargate91/eslint-config --type fullstack
 `);
 }
 
@@ -50,8 +63,11 @@ function detectPackageManager(cwd) {
   return "npm";
 }
 
-function getInstallCommand(pm) {
-  const pkgs = "@stargate91/eslint-config eslint typescript";
+function getInstallCommand(pm, withStylelint = false) {
+  let pkgs = "@stargate91/eslint-config eslint typescript";
+  if (withStylelint) {
+    pkgs += " @stargate91/stylelint-config stylelint";
+  }
   switch (pm) {
     case "pnpm":
       return `pnpm add -D ${pkgs}`;
@@ -60,7 +76,7 @@ function getInstallCommand(pm) {
     case "bun":
       return `bun add -d ${pkgs}`;
     default:
-      return `npm install -D ${pkgs}`;
+      return `npm install --save-dev ${pkgs}`;
   }
 }
 
@@ -186,7 +202,20 @@ export default tseslint.config(
   console.log(`[stargate-eslint] Created eslint.config.mjs (${type} configuration)`);
 }
 
-function updatePackageJson(cwd) {
+function generateStylelintConfigFile(cwd) {
+  const targetPath = path.join(cwd, ".stylelintrc.json");
+  if (fs.existsSync(targetPath)) {
+    const backupPath = path.join(cwd, ".stylelintrc.json.bak");
+    fs.copyFileSync(targetPath, backupPath);
+    console.log(`[stargate-eslint] Existing .stylelintrc.json backed up to .stylelintrc.json.bak`);
+  }
+
+  const content = JSON.stringify({ extends: "@stargate91/stylelint-config" }, null, 2) + "\n";
+  fs.writeFileSync(targetPath, content, "utf8");
+  console.log(`[stargate-eslint] Created .stylelintrc.json (extending @stargate91/stylelint-config)`);
+}
+
+function updatePackageJson(cwd, withStylelint = false) {
   const pkgPath = path.join(cwd, "package.json");
   if (!fs.existsSync(pkgPath)) {
     console.log(`[stargate-eslint] No package.json found in current directory, skipping script injection.`);
@@ -211,9 +240,20 @@ function updatePackageJson(cwd) {
       modified = true;
     }
 
+    if (withStylelint) {
+      if (!pkg.scripts["lint:css"]) {
+        pkg.scripts["lint:css"] = 'stylelint "src/**/*.css"';
+        modified = true;
+      }
+      if (!pkg.scripts["lint:css:fix"]) {
+        pkg.scripts["lint:css:fix"] = 'stylelint "src/**/*.css" --fix';
+        modified = true;
+      }
+    }
+
     if (modified) {
       fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n", "utf8");
-      console.log(`[stargate-eslint] Added "lint" and "lint:fix" scripts to package.json`);
+      console.log(`[stargate-eslint] Updated scripts in package.json (lint${withStylelint ? ', lint:css' : ''})`);
     } else {
       console.log(`[stargate-eslint] package.json scripts already configured.`);
     }
@@ -235,18 +275,31 @@ async function run() {
   }
 
   const cwd = process.cwd();
-  const configType = values.type || "backend";
+  let configType = values.type || "backend";
+  if (!VALID_TYPES.includes(configType)) {
+    console.warn(`[stargate-eslint] Unknown configuration type "${configType}", defaulting to "backend".`);
+    configType = "backend";
+  }
+
+  const withStylelint = values.stylelint === true;
 
   console.log(`[stargate-eslint] Initializing ${configType} ESLint configuration...`);
+  if (withStylelint) {
+    console.log(`[stargate-eslint] Stylelint integration enabled (--stylelint).`);
+  }
 
   const pm = values.pm || detectPackageManager(cwd);
   console.log(`[stargate-eslint] Detected package manager: ${pm}`);
 
   generateConfigFile(cwd, configType);
-  updatePackageJson(cwd);
+  if (withStylelint) {
+    generateStylelintConfigFile(cwd);
+  }
+
+  updatePackageJson(cwd, withStylelint);
 
   if (!values["skip-install"]) {
-    const installCmd = getInstallCommand(pm);
+    const installCmd = getInstallCommand(pm, withStylelint);
     console.log(`[stargate-eslint] Running: ${installCmd}`);
     try {
       execSync(installCmd, { cwd, stdio: "inherit" });
