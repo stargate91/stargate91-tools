@@ -19,7 +19,7 @@ import i18nextPlugin from "eslint-plugin-i18next";
  * @param {Object} [options]
  * @param {string} [options.tsconfigRootDir] - Root directory for resolving tsconfig paths
  * @param {string[]|boolean} [options.project] - Path(s) to tsconfig.json files for type-aware linting
- * @param {string[]} [options.files] - Glob patterns for frontend files (default: ["**/*.{ts,tsx}"])
+ * @param {string[]} [options.files] - Glob patterns for frontend files to lint
  * @param {Object} [options.react] - React-specific configuration overrides
  * @param {boolean} [options.react.allowInlineStyles=false] - If true, permits inline style attributes
  * @param {Object} [options.security] - Security plugin overrides
