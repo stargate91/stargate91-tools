@@ -1,33 +1,55 @@
 # @stargate91/eslint-config
 
-Enterprise-grade shared ESLint 9+ Flat Configurations for Stargate91 projects.
+Enterprise-grade shared ESLint 9+ Flat Configurations for Stargate91 projects. Fully type-aware, zero-compromise rulesets designed for pure TypeScript packages, robust backend services, and modern React 19 frontend applications.
+
+[![npm version](https://img.shields.io/npm/v/@stargate91/eslint-config.svg)](https://www.npmjs.com/package/@stargate91/eslint-config)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![ESLint](https://img.shields.io/badge/ESLint-9.x%20Flat%20Config-4B32C3.svg)](https://eslint.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-%3E%3D5.0.0-3178C6.svg)](https://www.typescriptlang.org/)
+
+---
+
+## Features
+
+- **ESLint 9 Flat Config Native**: Modern `eslint.config.mjs` without legacy `.eslintrc` debt.
+- **Automated CLI Installer**: Run a single `npx` command to initialize configs, scripts, and dependencies.
+- **3 Specialized Profiles**:
+  - `/base`: Pure TypeScript libraries, utilities, models, and shared packages.
+  - `/backend`: Node.js process protection, Drizzle ORM query guards, strict async/promise safety.
+  - `/frontend`: React 19 Compiler rules, strict JSX ergonomics, zero inline styles, 11 WCAG 2.1 A11y rules, ReDoS security audit, and granular i18n filtering.
+- **Import Determinism**: Consistent `import-x` order grouping, self-import prevention, and circular dependency checks.
+- **Strict TypeScript**: Type-aware `strictTypeChecked` and `stylisticTypeChecked` suites out of the box.
+
+---
 
 ## Quick Start (CLI Installer)
 
-### Base TypeScript Library / Shared Package:
+Initialize your ESLint configuration in one non-interactive command:
+
+### 1. Pure TypeScript Library / Shared Package:
 ```bash
-npx @stargate91/eslint-config --type base
+npx @stargate91/eslint-config@latest --type base
 ```
 
-### Backend Project:
+### 2. Frontend Application (React, Next.js, Vite):
 ```bash
-npx @stargate91/eslint-config --type backend
+npx @stargate91/eslint-config@latest --type frontend
 ```
 
-### Frontend Project (React / Next.js / Vite):
+### 3. Backend Service (Node.js, Drizzle ORM, APIs, Bots):
 ```bash
-npx @stargate91/eslint-config --type frontend
+npx @stargate91/eslint-config@latest --type backend
 ```
 
-### Fullstack Monorepo:
+### 4. Fullstack Monorepo Root:
 ```bash
-npx @stargate91/eslint-config --type fullstack
+npx @stargate91/eslint-config@latest --type fullstack
 ```
 
-### CLI Options
+### CLI Flags
 
-```bash
-npx @stargate91/eslint-config --help
+```text
+Usage: stargate-eslint [options]
 
 Options:
   -t, --type <type>        Configuration type: base, backend, frontend, fullstack (default: backend)
@@ -37,43 +59,72 @@ Options:
   -h, --help               Show help message
 ```
 
-## Configurations
+---
+
+## Manual Installation
+
+If you prefer manual setup or are integrating into an existing workspace:
+
+```bash
+npm install -D @stargate91/eslint-config eslint typescript-eslint
+```
+
+---
+
+## Configuration Profiles
 
 ### 1. Base Configuration (`@stargate91/eslint-config/base`)
-Designed for pure TypeScript libraries, shared models, utility libraries, and packages without React or Node runtime dependencies:
-- **Type-Aware TypeScript:** `strictTypeChecked` + `stylisticTypeChecked`.
-- **Core Hygiene:** `consistent-type-imports`, `no-explicit-any`, `curly`, `eqeqeq`, `no-floating-promises`, `return-await: in-try-catch`.
-- **Security Auditing:** `eslint-plugin-security` ReDoS, eval, timing attack checks.
-- **Import Architecture:** `import-x/order`, `no-cycle`, `no-duplicates`, `no-self-import`.
+
+Tailored for pure TypeScript packages, shared models, utility libraries, and modules without React or Node runtime dependencies.
 
 ```javascript
+// eslint.config.mjs
 import tseslint from "typescript-eslint";
 import { createBaseConfig } from "@stargate91/eslint-config/base";
 
 export default tseslint.config(
-  { ignores: ["**/dist/**", "**/node_modules/**", "**/*.d.ts"] },
+  {
+    ignores: [
+      "**/dist/**",
+      "**/build/**",
+      "**/node_modules/**",
+      "**/*.d.ts",
+    ],
+  },
   ...createBaseConfig({
     tsconfigRootDir: import.meta.dirname,
-    project: true,
+    project: ["./tsconfig.json"],
   })
 );
 ```
 
+**Key Rules:**
+- **Strict TypeScript**: `consistent-type-imports`, `no-explicit-any`, `no-non-null-assertion`, `use-unknown-in-catch-callback-variable`.
+- **Async Safety**: `no-floating-promises`, `no-misused-promises`, `await-thenable`, `return-await: in-try-catch`.
+- **Security Auditing**: `detect-unsafe-regex`, `detect-eval-with-expression`, buffer and timing attack detection.
+- **Import Hygiene**: `import-x/order`, `no-cycle`, `no-self-import`, `no-duplicates`.
+
+---
+
 ### 2. Frontend Configuration (`@stargate91/eslint-config/frontend`)
-Combines the best practices from Nova, My-Website, and Swaya-Main:
-- **Strict React & JSX Ergonomics (Nova):** Forbids inline `style` props, enforces `self-closing-comp`, `hook-use-state`, clean boolean values, and fragments.
-- **React Compiler & Hooks (Swaya-Main):** React 19 rules (`react-hooks/immutability`, `set-state-in-effect`, `preserve-manual-memoization`, `refs`).
-- **Accessibility / WCAG 2.1 (Nova & My-Website):** 11 mandatory `jsx-a11y` error checks.
-- **Security Auditing (My-Website):** `eslint-plugin-security` ReDoS, eval, and timing attack checks.
-- **Deterministic Import Architecture (My-Website):** `import-x/order` grouping and cycle detection.
-- **Granular i18n Hygiene (Nova):** Comprehensive exclusion of layout props, icons, and styling utilities.
+
+Synthesized from the battle-tested rulesets of **Nova**, **My-Website**, and **Swaya-Main**:
 
 ```javascript
+// eslint.config.mjs
 import tseslint from "typescript-eslint";
 import { createFrontendConfig } from "@stargate91/eslint-config/frontend";
 
 export default tseslint.config(
-  { ignores: ["**/dist/**", "**/node_modules/**", "**/*.d.ts"] },
+  {
+    ignores: [
+      "**/dist/**",
+      "**/build/**",
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/*.d.ts",
+    ],
+  },
   ...createFrontendConfig({
     tsconfigRootDir: import.meta.dirname,
     project: ["./tsconfig.json"],
@@ -81,9 +132,123 @@ export default tseslint.config(
 );
 ```
 
+**Key Rules:**
+- **Zero Inline Styles (Nova)**: `react/forbid-dom-props: style` and `react/forbid-component-props: style` enforce utility CSS systems.
+- **Strict JSX Ergonomics (Nova)**: `react/self-closing-comp`, `react/hook-use-state` (`[val, setVal]` naming), `react/jsx-boolean-value: never`, `react/jsx-curly-brace-presence`.
+- **React 19 Compiler Preparation (Swaya-Main)**: `react-hooks/immutability`, `set-state-in-effect`, `preserve-manual-memoization`, `refs`.
+- **Accessibility / WCAG 2.1 (Nova & My-Website)**: 11 mandatory `jsx-a11y` error checks (`alt-text`, `anchor-is-valid`, `aria-role`, `tabindex-no-positive`, etc.).
+- **Granular i18n Hygiene (Nova)**: `eslint-plugin-i18next` with comprehensive layout and token exclusions (`className`, `variant`, `size`, `gap`, `icon`, `clsx`, `cva`).
+
+---
+
 ### 3. Backend Configuration (`@stargate91/eslint-config/backend`)
-- **Type-Aware TypeScript:** `strictTypeChecked` + `stylisticTypeChecked`.
-- **Async & Promise Safety:** `return-await: in-try-catch`, `no-floating-promises`, `no-misused-promises`, `use-unknown-in-catch-callback-variable`.
-- **Node.js Process & Event-Loop Protection:** `n/no-process-exit`, `n/no-path-concat`, `n/no-sync`.
-- **Drizzle ORM Safety:** `drizzle/enforce-delete-with-where`, `drizzle/enforce-update-with-where`.
-- **Import Architecture:** `import-x/no-cycle`, `import-x/no-self-import`.
+
+Optimized for Node.js backend servers, microservices, Discord/Telegram bots, and database layers:
+
+```javascript
+// eslint.config.mjs
+import tseslint from "typescript-eslint";
+import { createBackendConfig } from "@stargate91/eslint-config/backend";
+
+export default tseslint.config(
+  {
+    ignores: [
+      "**/dist/**",
+      "**/dist-electron/**",
+      "**/node_modules/**",
+      "**/drizzle/**",
+      "**/*.d.ts",
+    ],
+  },
+  ...createBackendConfig({
+    tsconfigRootDir: import.meta.dirname,
+    project: true,
+    drizzle: { enabled: true },
+  })
+);
+```
+
+**Key Rules:**
+- **Node.js Process & Event Loop Safety**: `n/no-process-exit`, `n/no-sync`, `n/no-path-concat`.
+- **Drizzle ORM Query Protection**: `drizzle/enforce-delete-with-where`, `drizzle/enforce-update-with-where`.
+- **Strict Async Safety**: `return-await: in-try-catch`, `no-floating-promises`, `no-misused-promises`.
+
+---
+
+### 4. Fullstack Monorepo Configuration
+
+For fullstack repositories where backend and frontend packages coexist in a single ESLint configuration:
+
+```javascript
+// eslint.config.mjs
+import tseslint from "typescript-eslint";
+import { createBackendConfig } from "@stargate91/eslint-config/backend";
+import { createFrontendConfig } from "@stargate91/eslint-config/frontend";
+
+export default tseslint.config(
+  {
+    ignores: [
+      "**/dist/**",
+      "**/build/**",
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/drizzle/**",
+      "**/*.d.ts",
+    ],
+  },
+
+  // Backend services (Node.js, Drizzle, API, Bots)
+  ...createBackendConfig({
+    tsconfigRootDir: import.meta.dirname,
+    project: ["./apps/api/tsconfig.json", "./apps/bot/tsconfig.json"],
+    files: ["apps/api/**/*.ts", "apps/bot/**/*.ts", "packages/backend/**/*.ts"],
+  }),
+
+  // Frontend applications (React, Vite, Next.js)
+  ...createFrontendConfig({
+    tsconfigRootDir: import.meta.dirname,
+    project: ["./apps/web/tsconfig.json"],
+    files: ["apps/web/**/*.{ts,tsx}", "packages/ui/**/*.{ts,tsx}"],
+  })
+);
+```
+
+---
+
+## Configuration Options API
+
+All config factory functions accept an options object:
+
+| Option | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `tsconfigRootDir` | `string` | `process.cwd()` | Root directory for resolving tsconfig paths |
+| `project` | `boolean \| string[]` | `true` | Path(s) to `tsconfig.json` files for type-aware linting |
+| `files` | `string[]` | *Profile dependent* | Target glob patterns |
+| `rules` | `Record<string, any>` | `{}` | Custom user rule overrides |
+| `security.enabled` | `boolean` | `true` | Toggle security plugin auditing |
+| `imports.enabled` | `boolean` | `true` | Toggle import ordering & cycle checks |
+| `drizzle.enabled` *(backend)* | `boolean` | `true` | Toggle Drizzle ORM safety rules |
+| `node.enabled` *(backend)* | `boolean` | `true` | Toggle Node.js process & event-loop safety rules |
+| `react.allowInlineStyles` *(frontend)* | `boolean` | `false` | If `true`, permits inline `style` attributes |
+| `i18n.enabled` *(frontend)* | `boolean` | `true` | Toggle literal string checks for internationalization |
+
+---
+
+## Package.json Scripts
+
+Add the following to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  }
+}
+```
+
+---
+
+## License
+
+MIT License © 2026 stargate91
