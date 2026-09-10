@@ -1,0 +1,20 @@
+{
+  "name": "stargate91-tools-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared development tooling, configurations, and primitives for Stargate91 projects",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "npm --prefix packages/eslint-config run lint"
+  },
+  "keywords": [
+    "stargate91",
+    "tooling",
+    "eslint",
+    "monorepo"
+  ],
+  "author": "stargate91",
+  "license": "MIT"
+}
